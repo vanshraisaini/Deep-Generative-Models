@@ -8,11 +8,11 @@ from model.decoder import Decoder
 
 class VAE(nn.Module):
 
-    def __init__(self, latent_dim, device):
+    def __init__(self, latent_dim, device, dtype):
         super().__init__()
 
-        self.encoder = Encoder(latent_dim=latent_dim, device=device)
-        self.decoder = Decoder(latent_dim=latent_dim, device=device)
+        self.encoder = Encoder(latent_dim=latent_dim, device=device, dtype=dtype)
+        self.decoder = Decoder(latent_dim=latent_dim, device=device, dtype=dtype)
 
     def forward(self, inputs):
         #input dim: (B, 3, 224, 224)
