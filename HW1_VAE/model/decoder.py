@@ -7,7 +7,7 @@ class Decoder(nn.Module):
         super().__init__()
 
         self.linear = nn.Sequential(
-            nn.Linear(in_features=latent_dim, out_features=56*56, device=device),
+            nn.Linear(in_features=latent_dim, out_features=56*56, device=device ),
             nn.LeakyReLU(inplace=True),
             nn.Linear(in_features=56*56, out_features=20*56*56, device=device),
             nn.LeakyReLU(inplace=True),  
