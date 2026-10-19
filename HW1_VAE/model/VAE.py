@@ -10,6 +10,8 @@ class VAE(nn.Module):
 
     def __init__(self, latent_dim, device, dtype):
         super().__init__()
+        self.latent_dim = latent_dim
+        self.device = device
 
         self.encoder = Encoder(latent_dim=latent_dim, device=device, dtype=dtype)
         self.decoder = Decoder(latent_dim=latent_dim, device=device, dtype=dtype)
@@ -27,5 +29,8 @@ class VAE(nn.Module):
         recon_loss = F.mse_loss(recon, target, reduction="sum") / target.shape[0]
         kl = -0.5 * torch.sum(1 + log_var - mean.pow(2) - log_var.exp()) / target.shape[0]
         return recon_loss, kl
-        
 
+    def sample(self, num_samples):
+        with torch.no_grad():
+            z = torch.randn(num_samples, self.latent_dim).to(self.device)
+            return self.decoder(z)

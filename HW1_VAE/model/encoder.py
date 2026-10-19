@@ -19,16 +19,16 @@ class Encoder(nn.Module):
             nn.Conv2d(256, 256, kernel_size=3, padding=1, device=self.device, dtype=self.dtype),
             nn.SiLU(),
             nn.Flatten(),        #(B, 256*14*14)
-            nn.Linear(in_features=256*14*14, out_features=56*56, device=device, dtype=dtype), #(B, 56*56)
+            nn.Linear(in_features=256*14*14, out_features=512, device=device, dtype=dtype), #(B, 512)
             nn.LeakyReLU(inplace=True)
 
         )
 
         self.mean_head = torch.nn.Sequential(
-            nn.Linear(in_features=56*56, out_features=latent_dim, device=device, dtype=dtype),
+            nn.Linear(in_features=512, out_features=latent_dim, device=device, dtype=dtype),
         )
         self.covariance_head = torch.nn.Sequential(
-            nn.Linear(in_features=56*56, out_features=latent_dim, device=device, dtype=dtype),
+            nn.Linear(in_features=512, out_features=latent_dim, device=device, dtype=dtype),
         )
 
     def forward(self, images):

@@ -9,9 +9,9 @@ class Decoder(nn.Module):
         self.dtype = dtype
 
         self.linear = nn.Sequential(
-            nn.Linear(in_features=latent_dim, out_features=56*56, device=device, dtype=dtype),
+            nn.Linear(in_features=latent_dim, out_features=512, device=device, dtype=dtype),
             nn.LeakyReLU(inplace=True),
-            nn.Linear(in_features=56*56, out_features=256*14*14, device=device, dtype=dtype),
+            nn.Linear(in_features=512, out_features=256*14*14, device=device, dtype=dtype),
             nn.LeakyReLU(inplace=True),  
         )
 
