@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-from torch.nn.utils import spectral_norm
 
 
 class Discriminator(nn.Module):
@@ -17,7 +16,7 @@ class Discriminator(nn.Module):
             self.down(128, 256),  # (B, 256, 8, 8)
             self.down(256, 512),  # (B, 512, 4, 4)
             nn.Flatten(),         # (B, 512*4*4)
-            spectral_norm(nn.Linear(512 * 4 * 4, 1, device=device, dtype=dtype)),  # (B, 1)
+            nn.Linear(512 * 4 * 4, 1, device=device, dtype=dtype),  # (B, 1)
         )
 
     def forward(self, images):
@@ -25,12 +24,11 @@ class Discriminator(nn.Module):
         return self.base_model(images).squeeze(1)  # (B,) raw scores, no sigmoid
 
     def down(self, i, o):
-        # spectral norm on every layer keeps D smooth (Lipschitz), which is the
-        # main thing that stops GAN training from blowing up. No BatchNorm in D.
+        # no spectral norm and no BatchNorm: D is kept smooth by the R1 penalty instead
         return nn.Sequential(
-            spectral_norm(nn.Conv2d(i, o, kernel_size=3, padding=1, device=self.device, dtype=self.dtype)),
+            nn.Conv2d(i, o, kernel_size=3, padding=1, device=self.device, dtype=self.dtype),
             nn.LeakyReLU(0.2),
-            spectral_norm(nn.Conv2d(o, o, kernel_size=4, stride=2, padding=1, device=self.device, dtype=self.dtype)),
+            nn.Conv2d(o, o, kernel_size=4, stride=2, padding=1, device=self.device, dtype=self.dtype),
             nn.LeakyReLU(0.2),
         )
 

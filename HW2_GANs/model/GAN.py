@@ -21,15 +21,23 @@ class GAN(nn.Module):
         z = torch.randn(num_samples, self.latent_dim, device=self.device, dtype=self.dtype)
         return self.generator(z)                          # (B, 3, 128, 128) in [-1, 1]
 
+    # Non-saturating GAN loss (softplus form of the original BCE loss)
     def discriminator_loss(self, real, fake):
         real_scores = self.discriminator(real)
         fake_scores = self.discriminator(fake.detach())   # don't backprop into G here
-        loss_real = F.relu(1.0 - real_scores).mean()
-        loss_fake = F.relu(1.0 + fake_scores).mean()
-        return loss_real + loss_fake, real_scores.mean(), fake_scores.mean()
+        loss = F.softplus(-real_scores).mean() + F.softplus(fake_scores).mean()
+        return loss, real_scores.mean(), fake_scores.mean()
 
     def generator_loss(self, fake):
-        return -self.discriminator(fake).mean()
+        return F.softplus(-self.discriminator(fake)).mean()
+
+    def r1_penalty(self, real):
+        # R1 (Mescheder et al. 2018, used in StyleGAN): penalize the gradient of D
+        # on real images, so D stays smooth without needing spectral norm
+        real = real.detach().requires_grad_(True)
+        scores = self.discriminator(real)
+        grad, = torch.autograd.grad(scores.sum(), real, create_graph=True)
+        return grad.pow(2).sum(dim=(1, 2, 3)).mean()
 
     def sample(self, num_samples):
         # returns images in [0, 1] so they can be plotted directly
